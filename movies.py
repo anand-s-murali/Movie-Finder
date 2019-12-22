@@ -22,7 +22,7 @@ def scrape(query):
         URL = search_results[0].link
         if URL == "https://www.rottentomatoes.com/":
             print("No movie specified!")
-            sys.exit(0)
+            sys.exit(1)
         elif "/search" in URL:
             print("Not allowed to crawl here!")
             sys.exit(0)
@@ -30,7 +30,7 @@ def scrape(query):
         # make sure request was valid
         if response.status_code != 200:
             print("Error retrieving the url specified by {}".format(URL))
-            sys.exit(0)
+            sys.exit(1)
     
         soup = BeautifulSoup(response.content, features="lxml")
 
@@ -69,7 +69,7 @@ def scrape(query):
     except Exception as e:
         print(e)
         print(traceback.format_exc())
-        sys.exit(0)
+        sys.exit(1)
 
 
 def main():
@@ -88,7 +88,7 @@ def main():
         title = sys.argv[1] + "rotten tomatoes"
     except Exception as e:
         print("No movie specified.")
-        sys.exit(0)
+        sys.exit(1)
     
     scrape(title)
 
