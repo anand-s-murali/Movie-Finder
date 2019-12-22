@@ -1,7 +1,8 @@
 import scrapy
 from scrapy_splash import SplashRequest
-from scrapy.utils.project import get_project_settings
 from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings
+from scrapy.settings import Settings
 import sys
 import time
 from google import google
@@ -28,37 +29,40 @@ class MovieSpider(scrapy.Spider):
         url = kwargs.get("url")
         # make sure url is found and is appropriate
         if not url:
+            print(url)
             raise ValueError("Improper url given")
         if not isinstance(url, str):
             print(type(url))
             raise ValueError("url passed is not a string!")
-    
         # add the url to the start_url list
         self.start_urls.append(url)
 
     # perform the scraping over the given links (just one for now)
     def start_requests(self):
-        for url in start_urls:
+        for url in self.start_urls:
             # get splash request
             yield SplashRequest(url=url, callback=self.parse, endpoint='render.html')
     
     # performs the page parsing
     def parse(self, response):
-        # TODO
-        print("HERE")
-        print(response.url)
-
+        print(response.css)
 
 def scrape(query):
     # get the rotten tomatoes page using google search and store the first page of search results
     num_page = 1
     search_results = google.search(query, num_page)
-    while(len(search_results) != 10):
+    # we only want to try three times...
+    flag = 1
+    while(len(search_results) != 10 and flag < 3):
         # sleep for a little bit so not to get banned
         print("sleeping...")
         time.sleep(2)
         search_results = google.search(query,num_page)
+        flag += 1
 
+    # handle flag error
+    if flag == 3:
+        raise ValueError("Unable to get page. Consider rewording your search query.")
 
     try:
         # get rotten tomato link
@@ -69,13 +73,11 @@ def scrape(query):
         elif "/search" in URL:
             print("Not allowed to crawl here!")
             sys.exit(1)
-        
-        # now that we have the link, we need to scrape the page
-        # this will/must be handled by crawler process!
-        process = CrawlerProcess(get_project_settings())
+
+        # start the scraping!
+        process = CrawlerProcess(settings=get_project_settings())
         process.crawl(MovieSpider, url=URL)
-        # this call will block until cralwer is finished
-        #process.start()
+        process.start()        
     except IndexError:
         print(search_results)
         sys.exit(1)
@@ -95,7 +97,6 @@ def main():
         sys.exit(0)
     
     scrape(movie_query)
-
 
 # this will be the first thing to be run when the script opens
 # it is only responsible for calling the main() function above it
