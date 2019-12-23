@@ -20,6 +20,9 @@ NEWSPIDER_MODULE = 'movie.spiders'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
+''' Setting log level to remove unnecessary information that clutters output '''
+LOG_ENABLED = False
+
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 

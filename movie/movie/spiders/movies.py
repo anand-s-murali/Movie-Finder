@@ -6,7 +6,6 @@ import sys
 import time
 from google import google
 from bs4 import BeautifulSoup
-#import requests
 
 class MovieItem(scrapy.Item):
     title = scrapy.Field()
@@ -14,6 +13,11 @@ class MovieItem(scrapy.Item):
     cast = scrapy.Field()
     rotten_rating = scrapy.Field()
     audience_rating = scrapy.Field()
+
+
+# global variable to store scraped results
+# not good practice, but okay for what we are doing
+scraped_data = dict()
 
 class MovieSpider(scrapy.Spider):
     # name the spider and provide start url
@@ -32,7 +36,6 @@ class MovieSpider(scrapy.Spider):
             print(url)
             raise ValueError("Improper url given")
         if not isinstance(url, str):
-            print(type(url))
             raise ValueError("url passed is not a string!")
         # add the url to the start_url list
         self.start_urls.append(url)
@@ -43,10 +46,14 @@ class MovieSpider(scrapy.Spider):
         movie_info = MovieItem()
 
         # get the title
-        movie_info["title"] = soup.find("title").text
+        title = soup.find("title").text
+        movie_info["title"] = title 
+        scraped_data["title"] = title
 
         # get the synopsis
-        movie_info["synopsis"] = soup.find(id="movieSynopsis").text.strip()
+        synopsis = soup.find(id="movieSynopsis").text.strip()
+        movie_info["synopsis"] = synopsis
+        scraped_data["synopsis"] = synopsis
 
         # get the cast
         cast = []
@@ -68,6 +75,7 @@ class MovieSpider(scrapy.Spider):
         
         # set the cast
         movie_info["cast"] = cast
+        scraped_data["cast"] = cast
 
         # get the rotten tomato score and audience score by iterating over specific spans
         # iterate over each span
@@ -77,20 +85,23 @@ class MovieSpider(scrapy.Spider):
 
         movie_info["rotten_rating"] = ratings[0]
         movie_info["audience_rating"] = ratings[1]
-
+        scraped_data["rotten_rating"] = ratings[0]
+        scraped_data["audience_rating"] = ratings[1]
+    
         # return movie info
-        yield movie_info
+        # yield movie_info
+        return movie_info
         
 
 def scrape(query):
     # get the rotten tomatoes page using google search and store the first page of search results
     num_page = 1
     search_results = google.search(query, num_page)
-    # we only want to try three times...
+    # we only want to try 5 times...
     flag = 1
-    while(len(search_results) != 10 and flag < 3):
+    while(len(search_results) == 0 and flag < 5):
         # sleep for a little bit so not to get banned
-        print("sleeping...")
+        # print("sleeping...")
         time.sleep(2)
         search_results = google.search(query,num_page)
         flag += 1
@@ -112,7 +123,14 @@ def scrape(query):
         # start the scraping!
         process = CrawlerProcess(settings=get_project_settings())
         process.crawl(MovieSpider, url=URL)
-        process.start()        
+        process.start()
+
+        # now we just need to print our results!
+        print("{}\n".format(scraped_data["title"]))
+        print("{}\n".format(scraped_data["synopsis"]))
+        print("Cast: {}\n".format(", ".join(scraped_data["cast"])))
+        print("Rotten tomato score: {}, Audience score: {}".format(scraped_data["rotten_rating"], scraped_data["audience_rating"]))
+
     except IndexError:
         print(search_results)
         sys.exit(1)
