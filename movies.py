@@ -12,7 +12,8 @@ class MovieItem(scrapy.Item):
     title = scrapy.Field()
     synopsis = scrapy.Field()
     cast = scrapy.Field()
-    #rating = scrapy.Field()
+    rotten_rating = scrapy.Field()
+    audience_rating = scrapy.Field()
 
 class MovieSpider(scrapy.Spider):
     # name the spider and provide start url
@@ -64,9 +65,18 @@ class MovieSpider(scrapy.Spider):
             role = role.strip()
             # add the actor and the cast
             cast.append(actor_name+" "+role)
-    
+        
         # set the cast
         movie_info["cast"] = cast
+
+        # get the rotten tomato score and audience score by iterating over specific spans
+        # iterate over each span
+        ratings = []
+        for r in soup.find_all("span", class_="mop-ratings-wrap__percentage"):
+            ratings.append(r.get_text().strip())
+
+        movie_info["rotten_rating"] = ratings[0]
+        movie_info["audience_rating"] = ratings[1]
 
         # return movie info
         yield movie_info
