@@ -9,11 +9,11 @@ I love movies, but it can become rather tedious having to look up the ratings, r
 Simply download or clone the repository to whatever location you'd like!
 
 # Usage
-To search for a movie, all you need to do is pass in the title as a parameter of the program. Simply navigate within the project until you reach the 
+To search for a movie, all you need to do is pass in the title as a parameter of the program. Simply navigate within the project until you are inside the 
 ```bash 
-spiders
+spiders directory.
 ```
-directory. Then run the following command: 
+Then run the following command: 
 ```bash
 python3 movies.py <movie_title or keyword>
 ```
