@@ -1,19 +1,18 @@
 import scrapy
-from scrapy_splash import SplashRequest
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 from scrapy.settings import Settings
 import sys
 import time
 from google import google
-#from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 #import requests
 
 class MovieItem(scrapy.Item):
     title = scrapy.Field()
     synopsis = scrapy.Field()
     cast = scrapy.Field()
-    rating = scrapy.Field()
+    #rating = scrapy.Field()
 
 class MovieSpider(scrapy.Spider):
     # name the spider and provide start url
@@ -37,15 +36,40 @@ class MovieSpider(scrapy.Spider):
         # add the url to the start_url list
         self.start_urls.append(url)
 
-    # perform the scraping over the given links (just one for now)
-    def start_requests(self):
-        for url in self.start_urls:
-            # get splash request
-            yield SplashRequest(url=url, callback=self.parse, endpoint='render.html')
-    
     # performs the page parsing
     def parse(self, response):
-        print(response.css)
+        soup = BeautifulSoup(response.text, 'lxml')
+        movie_info = MovieItem()
+
+        # get the title
+        movie_info["title"] = soup.find("title").text
+
+        # get the synopsis
+        movie_info["synopsis"] = soup.find(id="movieSynopsis").text.strip()
+
+        # get the cast
+        cast = []
+        for cast_item in soup.find_all("div", class_="cast-item media inlineBlock"):
+            actor_name = cast_item.find("span").text.strip()
+            # now get the role
+            role = cast_item.find("span", class_="characters subtle smaller").text.strip()
+
+            # remove the new lines and format string
+            split_str = role.split()
+            role = ""
+            for w in split_str:
+                if w != "":
+                    role += (w+" ")
+            # get rid of last space
+            role = role.strip()
+            # add the actor and the cast
+            cast.append(actor_name+" "+role)
+    
+        # set the cast
+        movie_info["cast"] = cast
+
+        # return movie info
+        yield movie_info
 
 def scrape(query):
     # get the rotten tomatoes page using google search and store the first page of search results
