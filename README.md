@@ -3,10 +3,10 @@
 Movie Finder is a Python script to help you find information on all the latest movies! 
 
 # Motivation
-I love movies, but it can become rather tedious having to look up the ratings, reviews, cast, etc. Movie Finder eliminates all the hassle. You provide the the movie you want to watch, whether it be new or old, and we'll go get all the information for you. The best part is, you don't even need to open your browswer!
+I love movies, but it can become rather tedious having to look up the ratings, reviews, cast, etc. Movie Finder eliminates all the hassle. You provide the movie you want to watch, whether it be new or old, and we'll go get all the information for you. The best part is, you don't even need to open your browser!
 
 # Installation
-To use this, simply download or clone the repository to whatever location you'd like!
+Simply download or clone the repository to whatever location you'd like!
 
 # Usage
 To search for a movie, all you need to do is pass in the title as a parameter of the program. Simply navigate within the project until you reach the 
