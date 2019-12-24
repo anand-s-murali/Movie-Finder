@@ -29,5 +29,5 @@ python3 movies.py "<movie_title or keyword>"
 # TODO
 + add multiple movie request support [done]
 + Fix URL being None error [hopefully done]
++ Add ability to save results to external file; essentially a "save for later" option [done]
 + add spell assumption, or some indication of "assuming you meant..."
-+ Add ability to save results to external file; essentially a "save for later" option
