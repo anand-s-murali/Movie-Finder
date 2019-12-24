@@ -6,6 +6,13 @@ import sys
 import time
 from google import google
 from bs4 import BeautifulSoup
+import traceback
+import os
+import csv
+
+# global variable to store scraped results
+# not good practice, but okay for what we are doing
+scraped_data = list()
 
 class MovieItem(scrapy.Item):
     title = scrapy.Field()
@@ -13,11 +20,6 @@ class MovieItem(scrapy.Item):
     cast = scrapy.Field()
     rotten_rating = scrapy.Field()
     audience_rating = scrapy.Field()
-
-
-# global variable to store scraped results
-# not good practice, but okay for what we are doing
-scraped_data = dict()
 
 class MovieSpider(scrapy.Spider):
     # name the spider and provide start url
@@ -44,16 +46,17 @@ class MovieSpider(scrapy.Spider):
     def parse(self, response):
         soup = BeautifulSoup(response.text, 'lxml')
         movie_info = MovieItem()
-
+        
         # get the title
         title = soup.find("title").text
-        movie_info["title"] = title 
-        scraped_data["title"] = title
+        index = title.find(" - Rotten Tomatoes")
+        if index != -1:
+            title = title[0:index]
+        movie_info["title"] = title
 
         # get the synopsis
         synopsis = soup.find(id="movieSynopsis").text.strip()
         movie_info["synopsis"] = synopsis
-        scraped_data["synopsis"] = synopsis
 
         # get the cast
         cast = []
@@ -75,7 +78,6 @@ class MovieSpider(scrapy.Spider):
         
         # set the cast
         movie_info["cast"] = cast
-        scraped_data["cast"] = cast
 
         # get the rotten tomato score and audience score by iterating over specific spans
         # iterate over each span
@@ -85,21 +87,21 @@ class MovieSpider(scrapy.Spider):
 
         movie_info["rotten_rating"] = ratings[0]
         movie_info["audience_rating"] = ratings[1]
-        scraped_data["rotten_rating"] = ratings[0]
-        scraped_data["audience_rating"] = ratings[1]
-    
-        # return movie info
-        # yield movie_info
-        return movie_info
+       
+        # add movie info to list if it is not already there
+        for mv in scraped_data:
+            if mv["title"] == movie_info["title"]:
+                return
+        # add the movie if we haven't seen it
+        scraped_data.append(movie_info)
         
-
-def scrape(query):
+def scrape(query, process):
     # get the rotten tomatoes page using google search and store the first page of search results
     num_page = 1
     search_results = google.search(query, num_page)
     # we only want to try 5 times...
     flag = 1
-    while(len(search_results) == 0 and flag < 5):
+    while((len(search_results) == 0 or search_results is None) and flag < 5):
         # sleep for a little bit so not to get banned
         # print("sleeping...")
         time.sleep(2)
@@ -107,52 +109,104 @@ def scrape(query):
         flag += 1
 
     # handle flag error
-    if flag == 3:
+    if flag == 5:
         raise ValueError("Unable to get page. Consider rewording your search query.")
-
     try:
         # get rotten tomato link
         URL = search_results[0].link
-        if URL == "https://www.rottentomatoes.com/":
+        if URL is None:
+            print(search_results)
+            print("attempts: {}".format(flag))
+            raise ValueError("URL was none. Quitting.")
+        elif URL == "https://www.rottentomatoes.com/":
             print("No movie specified!")
             sys.exit(1)
         elif "/search" in URL:
             print("Not allowed to crawl here!")
             sys.exit(1)
-
-        # start the scraping!
-        process = CrawlerProcess(settings=get_project_settings())
+        # initiate the crawling
         process.crawl(MovieSpider, url=URL)
-        process.start()
-
-        # now we just need to print our results!
-        print("{}\n".format(scraped_data["title"]))
-        print("{}\n".format(scraped_data["synopsis"]))
-        print("Cast: {}\n".format(", ".join(scraped_data["cast"])))
-        print("Rotten tomato score: {}, Audience score: {}".format(scraped_data["rotten_rating"], scraped_data["audience_rating"]))
-
     except IndexError:
         print(search_results)
         sys.exit(1)
     except Exception as e:
         print(e)
+        print(traceback.format_exc())
         sys.exit(1)
 
-# main method
+# main code goes here
 def main():
-    # main code goes here
-    # make sure to pass title in as one word! This means you need to pass in the title
-    # in quotes if the title is multiple words when passing in as system argument!
-    try:
-        movie_query = sys.argv[1] + "rotten tomatoes"
-    except Exception as e:
-        print("No movie specified.")
-        sys.exit(0)
+    # just to make output nicer!
+    print("\n")
+    # open our watch list file
+    path = "./watch_list.csv"
+    flag = os.path.isfile(path)
+    watch_file = open(path, "a+")
     
-    scrape(movie_query)
+    # check if this is the first time we are opening file
+    # if it is, just write the main header
+    watch_writer = csv.writer(watch_file, delimiter=",", quotechar="'")
+    if not flag:
+        # write the headers
+        watch_writer.writerow(["Title","Synopsis","Cast","Scores"])
 
-# this will be the first thing to be run when the script opens
-# it is only responsible for calling the main() function above it
-# think about this as int main() in C or main in java
+    # create the crawler process
+    process = CrawlerProcess(settings=get_project_settings())
+    # iterate over all movies presented (from system arguments)
+    for i in range(1, len(sys.argv)):
+        query = sys.argv[i] + " rotten tomatoes"
+        scrape(query, process)
+
+    # start the process after crawling everything!
+    process.start()
+    
+    # Add ability to save data to file
+    # iterate over each movie and see if we would like to output and save results
+    for movie in scraped_data:
+        # first ask if we want to print this movie to console
+        flag = False
+        while True:
+            val = input("Would you like to print {} to console? [y/n] ".format(movie["title"]))
+            if val == "y":
+                flag = True
+                # just to add some buffer space and make output nicer!
+                print()
+                break
+            elif val == "n":
+                break
+            else:
+                print("Input not understood.")
+        
+        # print if flag
+        if flag:
+            print("{}:".format(movie["title"]))
+            print("{}\n".format(movie["synopsis"]))
+            print("Cast: {}\n".format(", ".join(movie["cast"])))
+            print("Rotten tomato score: {}, Audience score: {}\n".format(movie["rotten_rating"], movie["audience_rating"]))
+        
+        # now check about saving to file
+        flag = False
+        while True:
+            val = input("Would you like to save this title to your watch list? [y/n] ")
+            if val == "y":
+                flag = True
+                # just to add some buffer space and make output nicer!
+                print()
+                break
+            elif val == "n":
+                break
+            else:
+                print("Input not understood.")
+
+        # save to file if flag
+        if flag:
+            # open file and save to it
+            watch_writer.writerow(["{}".format(movie["title"]), "{}".format(movie["synopsis"]), "{}".format(", ".join(movie["cast"])), "{}, {}".format(movie["rotten_rating"], movie["audience_rating"])])  
+        
+        print("----------------------------------------------------------\n")
+
+    # close the file at the end!
+    watch_file.close()
+
 if __name__ == "__main__":
     main()
