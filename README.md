@@ -35,6 +35,6 @@ Through running this script, you will automatically generate a "watch_list" csv 
 
 # TODO
 + add multiple movie request support :white_check_mark:
-+ Fix URL being None error :white_check_mark:
++ Fix URL being None error
 + Add ability to save results to external file; essentially a "save for later" option :white_check_mark:
 + add spell assumption, or some indication of "assuming you meant..."
