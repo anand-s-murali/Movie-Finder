@@ -35,12 +35,13 @@ class MovieSpider(scrapy.Spider):
         url = kwargs.get("url")
         # make sure url is found and is appropriate
         if not url:
-            print(url)
-            raise ValueError("Improper url given")
-        if not isinstance(url, str):
+            # print(url)
+            raise ValueError("Improper url or title given")
+        if not isinstance(url, str): 
             raise ValueError("url passed is not a string!")
         # add the url to the start_url list
         self.start_urls.append(url)
+        # set the title
 
     # performs the page parsing
     def parse(self, response):
@@ -53,7 +54,7 @@ class MovieSpider(scrapy.Spider):
         if index != -1:
             title = title[0:index]
         movie_info["title"] = title
-
+        
         # get the synopsis
         synopsis = soup.find(id="movieSynopsis").text.strip()
         movie_info["synopsis"] = synopsis
@@ -201,7 +202,8 @@ def main():
         # save to file if flag
         if flag:
             # open file and save to it
-            watch_writer.writerow(["{}".format(movie["title"]), "{}".format(movie["synopsis"]), "{}".format(", ".join(movie["cast"])), "{}, {}".format(movie["rotten_rating"], movie["audience_rating"])])  
+            watch_writer.writerow(["{}".format(movie["title"]), "{}".format(movie["synopsis"].replace(",","")), "{}".format(" | ".join(movie["cast"])), "Rotten rating: {} | Audience Rating: {}".format(movie["rotten_rating"], movie["audience_rating"])]) 
+            print("Saved successfully")
         
         print("----------------------------------------------------------\n")
 
