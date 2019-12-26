@@ -20,6 +20,8 @@ NEWSPIDER_MODULE = 'movie.spiders'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
+USER_AGENT = "Movie Crawler"
+
 ''' Setting log level to remove unnecessary information that clutters output '''
 LOG_ENABLED = False
 
