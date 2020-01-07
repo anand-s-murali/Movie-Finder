@@ -40,3 +40,4 @@ Through running this script, you will automatically generate a "watch_list" csv 
 + add multiple movie request support :white_check_mark:
 + Fix URL being None error :white_check_mark:
 + Add ability to save results to external file; essentially a "save for later" option :white_check_mark:
++ Should probably be using threads to handle multiple inputs...
