@@ -34,7 +34,7 @@ Through running this script, you will automatically generate a "watch_list" csv 
 # Frameworks/Libraries Used
 + [Scrapy](https://scrapy.org/)
 + [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/)
-+ [Google Search API](https://github.com/abenassi/Google-Search-API)
++ [googlesearch's API](https://python-googlesearch.readthedocs.io/en/latest/)
 
 # TODO
 + add multiple movie request support :white_check_mark:
