@@ -43,4 +43,4 @@ python3 -m pip install <module> --user
 + Add multiple movie request support :white_check_mark:
 + Add ability to save results to external "watch list" :white_check_mark:
 + Allow threads to handle multiple inputs :white_check_mark:
-+ Finding showtimes for newer movies
++ Finding showtimes for newer movies [maybe]
