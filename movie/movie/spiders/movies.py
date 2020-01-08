@@ -1,4 +1,4 @@
-# Requires python3
+# Requires python3 
 
 import scrapy
 from scrapy.crawler import CrawlerProcess
@@ -152,8 +152,7 @@ def main():
     # start crawler 
     process.start()
     ''' END SCRAPING AND THREADING '''
-
-    
+   
     ''' START OUTPUT AND SAVING '''
     # open our watch list file
     path = "./watch_list.csv"
@@ -162,7 +161,7 @@ def main():
     
     # check if this is the first time we are opening file
     # if it is, just write the main header
-    watch_writer = csv.writer(watch_file, delimiter=",", quotechar="'")
+    watch_writer = csv.writer(watch_file, delimiter=",")
     if not flag:
         # define the columns of the file
         watch_writer.writerow(["Title","Synopsis","Cast","Scores"])
@@ -188,7 +187,7 @@ def main():
         while True:
             val = input("Would you like to save this title to your watch list? [y/n] ")
             if val == "y":
-                watch_writer.writerow(["{}".format(movie["title"]), "{}".format(movie["synopsis"].replace(",","").replace("'","")), "{}".format(" | ".join(movie["cast"])).replace("'",""), "Rotten rating: {} | Audience Rating: {}".format(movie["rotten_rating"], movie["audience_rating"])]) 
+                watch_writer.writerow(["{}".format(movie["title"]), "{}".format(movie["synopsis"].replace(",","")), "{}".format(" -- ".join(movie["cast"])).replace("'",""), "Rotten rating: {} -- Audience Rating: {}".format(movie["rotten_rating"], movie["audience_rating"])]) 
                 print("Title saved successfully!")
         
                 break
