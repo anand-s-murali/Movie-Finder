@@ -1,8 +1,8 @@
 # Movie-Finder
-Movie-Finder is a Python script to help you find information on all the latest movies!
+Movie-Finder is a Python script designed help you find and store all the information on movies.
 
 # Motivation
-I love movies, but looking up movies online, especially when I have multiple in mind, can get rather tedious. Instead of opening up multiple tabs for each movie or searching one up one by one, I wanted to be able to do them all in one go. With Movie-Finder, you can do exactly that! Simply type in the movies you're interested in, and we'll do the rest.
+I love movies, but looking up movies online, especially when I have multiple in mind, can get rather tedious. Instead of opening up multiple tabs or searching individually, I wanted to be able to do them all in one pass. With Movie-Finder, you can do exactly that! Simply type in the movies you're interested in, and let the script do the rest.
 
 # Installation
 To use this script, simply download or clone the repository to whatever location you'd like!
