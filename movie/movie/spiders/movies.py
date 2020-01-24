@@ -44,7 +44,8 @@ class MovieSpider(scrapy.Spider):
     # performs the page parsing
     def parse(self, response):
         # define global scraped list
-        global scraped_data
+        #global scraped_data
+        print('here')
 
         # define other variables
         soup = BeautifulSoup(response.text, 'lxml')
@@ -96,7 +97,7 @@ class MovieSpider(scrapy.Spider):
         
         # only add the movie if we haven't seen it
         scraped_data.append(movie_info)
-        
+
 def scrape(query, process):
     # google search the query
     search_results = search(query, tld="com", lang="en", safe="on", num=10, start=0, stop=5, pause=2.0, country="us")
@@ -122,6 +123,21 @@ def scrape(query, process):
         print(traceback.format_exc())
         sys.exit(1)
 
+
+def handle(query):
+    process = CrawlerProcess(settings=get_project_settings())
+    
+
+    # scrape the data
+    scrape(query, process)
+    process.start()
+    
+    for movie in scraped_data:
+        print("{}:".format(movie["title"]))
+        print("{}\n".format(movie["synopsis"]))
+        print("Cast: {}\n".format(", ".join(movie["cast"])))
+        print("Rotten tomato score: {}, Audience score: {}\n".format(movie["rotten_rating"], movie["audience_rating"]))
+            
 # main code goes here
 def main():
     # print statement just to separate command execution from output
@@ -201,6 +217,3 @@ def main():
     # close file 
     watch_file.close()
     ''' END OUTPUT AND SAVING '''
-
-if __name__ == "__main__":
-    main()
